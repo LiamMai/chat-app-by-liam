@@ -1,6 +1,7 @@
 const express = require('express');
 const userRoute = express();
 const bodyParser = require('body-parser');
+const { isAuthenticatedUser } = require('../middlewares/auth')
 
 userRoute.use(bodyParser.json());
 userRoute.use(bodyParser.urlencoded({ extended: true }))
@@ -8,27 +9,21 @@ userRoute.use(bodyParser.urlencoded({ extended: true }))
 userRoute.use(express.static('public'))
 
 const path = require('path');
-const multer = require('multer');
 
-const storage =  multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../public/images'));
-    },
-    filename: (req, file, cb) => {
-        const name = Date.now() + '-' + file.originalname;
-        cb(null, name);
-    }
-})
 
-const userControllers = require('../controllers/userControllers')
+const { register, verifyMail, login, logout, test } = require('../controllers/userControllers')
 
-const upload = multer({ storage: storage });
 
- 
-userRoute.post('/register', userControllers.register)
-userRoute.get('/user/verify/:userId/:uniqueString', userControllers.verifyMail)
+
+userRoute.post('/register', register)
+userRoute.get('/user/verify/:userId/:uniqueString', verifyMail)
+
 userRoute.get('/verified', (req, res) => {
     res.sendFile(path.join(__dirname, "./../views/verified.html"))
 })
+
+userRoute.post('/login', login)
+userRoute.get('/logout', logout)
+userRoute.get('/test', isAuthenticatedUser, test)
 
 module.exports = userRoute;

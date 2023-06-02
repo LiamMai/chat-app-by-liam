@@ -25,7 +25,8 @@ const userSchema = mongoose.Schema({
     password: {
         type: String,
         required: [true, ''],
-        minLength: [6, 'password cannot be less than 6 characters']
+        minLength: [6, 'password cannot be less than 6 characters'],
+        select: false
     },
     is_online: {
         type: String,
@@ -50,17 +51,22 @@ const userSchema = mongoose.Schema({
 
 
 //Encrypting password before saving user
-userSchema.pre('save', async function(next)  {
-    if(!this.isModified('password')) {
+userSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) {
         next()
     }
 
     this.password = await bcrypt.hash(this.password, 10)
 })
 
+//Compare password
+userSchema.methods.comparePassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password)
+}
+
 //Return JWT Token
 userSchema.methods.getJwtToken = () => {
-    return jwt.sign({ id: this._id}, process.env.JWT_SECRET, {
+    return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_TIME
     })
 }

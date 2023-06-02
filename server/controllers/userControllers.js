@@ -4,6 +4,8 @@ const catchAsyncErrors = require("../middlewares/catchAsyncErrors")
 const UserVerification = require('../models/userVerification')
 const bcrypt = require('bcrypt')
 const path = require('path')
+const ErrorHandler = require('../utils/errorHandler')
+const sendToken = require('../utils/jwtToken')
 
 // Register User => /api/v1/register
 const register = catchAsyncErrors(async (req, res, next) => {
@@ -17,11 +19,11 @@ const register = catchAsyncErrors(async (req, res, next) => {
         }
     })
 
-    const token = user.getJwtToken();
 
     sendVerificationEmail({ _id: user._id, email }, res)
 
-    res.status(201).json({ success: true, user, token })
+
+    sendToken(user, 200, res);
 
 })
 
@@ -108,9 +110,49 @@ const verifyMail = async (req, res, next) => {
 
 const login = catchAsyncErrors(async (req, res, next) => {
     const { email, password } = req.body
+
+    if (!email || !password) {
+        next(new ErrorHandler('Please enter email & password', 400))
+    }
+
+    //Finding user in database
+    const user = await User.findOne({ email }).select('+password')
+
+    if (!user) {
+        return next(new ErrorHandler('Invalid Email Or Password', 401))
+    }
+
+    const isPasswordMatched = await user.comparePassword(password)
+
+    if (!isPasswordMatched) {
+        return next(new ErrorHandler('Invalid Email Or Password', 401))
+    }
+
+    const isVerified = await user.verified;
+
+    if (!isVerified) {
+        return next(new ErrorHandler('Email hasn\'t been verified yet. Check your mail!', 401))
+    }
+
+    sendToken(user, 200, res);
+})
+
+const logout = catchAsyncErrors(async (req, res, next) => {
+    res.cookie('token', null, {
+        expires: new Date(Date.now()),
+        httpOnly: true,
+    })
+    res.status(200).json({ success: true, message: 'Logged out' })
+})
+
+const test = catchAsyncErrors(async (req, res, next) => {
+    res.status(200).json({ success: true, data: 'TEST' })
 })
 
 module.exports = {
     register,
-    verifyMail
+    verifyMail,
+    login,
+    logout,
+    test
 }
