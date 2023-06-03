@@ -20,7 +20,10 @@ const sendFriendRequest = catchAsyncErrors(async (req, res, next) => {
     const friend = new Friend({ sender: userId, receiver: friendId });
     await friend.save();
 
-    return res.status(201).json({ friend })
+    return res.status(201).json({
+        success: true,
+        friend
+    })
 })
 
 const acceptFriendRequest = catchAsyncErrors(async (req, res, next) => {
@@ -41,7 +44,10 @@ const acceptFriendRequest = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler('You can\'t accept friend to your self!!!', 404))
     }
 
-    return res.status(200).json({ friend })
+    return res.status(200).json({
+        success: true,
+        friend
+    })
 })
 
 
@@ -49,10 +55,8 @@ const rejectFriendRequest = catchAsyncErrors(async (req, res, next) => {
     const { friendRequestId } = req.params;
     const userId = req.user.id;
 
-    const friend = await Friend.findOneAndUpdate(
+    const friend = await Friend.findOne(
         { _id: friendRequestId },
-        { $set: { status: 'rejected' } },
-        { new: true }
     );
 
     if (!friend) {
@@ -63,7 +67,12 @@ const rejectFriendRequest = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler('You can\'t rejected friend to your self!!!', 404))
     }
 
-    return res.status(200).json({ friend })
+    await Friend.findByIdAndDelete(friendRequestId)
+
+    return res.status(200).json({
+        success: true,
+        message: 'Canceled the friend request!!!'
+    })
 })
 
 const getFriends = catchAsyncErrors(async (req, res, next) => {
@@ -71,7 +80,10 @@ const getFriends = catchAsyncErrors(async (req, res, next) => {
     const friends = await Friend.find({ $or: [{ sender: userId }, { receiver: userId }], accepted: true })
         .populate('sender', 'name')
         .populate('receiver', 'name');
-    return res.status(200).json({ friends });
+    return res.status(200).json({
+        success: true, 
+        friends
+    });
 })
 
 const searchFriends = catchAsyncErrors(async (req, res, next) => {
