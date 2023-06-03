@@ -3,6 +3,7 @@ require('dotenv').config();
 const cloudinary = require('cloudinary').v2;
 const mongoose = require('mongoose');
 const cors = require('cors')
+const socket = require('socket.io')
 
 const cookieParser = require('cookie-parser')
 
@@ -31,18 +32,39 @@ const errorMiddleware = require('./middlewares/errors')
 
 
 const userRoute = require("./routes/userRoutes")
+const friendRoute = require('./routes/friendRoutes')
 
 app.use(cors())
 app.use(cookieParser())
 app.use('/api/v1', userRoute);
-
+app.use('/api/v1', friendRoute)
 
 //Middleware to handle errors
 app.use(errorMiddleware)
 
-app.listen(process.env.PORT, () => {
+const server = app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);
 })
+
+const io = socket(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+    }
+})
+
+app.use((req, res, next) => {
+    req.io = io;
+    next()
+})
+
+io.on('connection', (socket) => {
+    console.log(`Socket ${socket.id} connected`);
+
+    socket.on('disconnect', () => {
+        console.log(`Socket ${socket.id} disconnected`);
+    });
+});
 
 //Handle Unhandled Promise rejections
 process.on('unhandledRejection', error => {

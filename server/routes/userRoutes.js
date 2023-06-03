@@ -11,9 +11,7 @@ userRoute.use(express.static('public'))
 const path = require('path');
 
 
-const { register, verifyMail, login, logout, forgotPassword, resetPassword, test } = require('../controllers/userControllers')
-
-
+const { register, verifyMail, login, logout, forgotPassword, resetPassword, changePassword, test } = require('../controllers/userControllers')
 
 userRoute.post('/register', register)
 userRoute.get('/user/verify/:userId/:uniqueString', verifyMail)
@@ -26,6 +24,6 @@ userRoute.post('/login', login)
 userRoute.get('/logout', logout)
 userRoute.post('/password/forgot', forgotPassword)
 userRoute.put('/password/reset/:token', resetPassword)
-userRoute.get('/test', isAuthenticatedUser, test)
+userRoute.patch('/password/change', isAuthenticatedUser, changePassword)
 
 module.exports = userRoute;

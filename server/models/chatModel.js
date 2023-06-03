@@ -9,9 +9,13 @@ const chatSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    message: {
+    text: {
         type: String,
         require: true
+    },
+    created_at: {
+        type: Date,
+        default: Date.now()
     }
 }, { timestamps: true });
 

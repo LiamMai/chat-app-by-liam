@@ -146,10 +146,6 @@ const logout = catchAsyncErrors(async (req, res, next) => {
     res.status(200).json({ success: true, message: 'Logged out' })
 })
 
-const test = catchAsyncErrors(async (req, res, next) => {
-    res.status(200).json({ success: true, data: 'TEST' })
-})
-
 const forgotPassword = catchAsyncErrors(async (req, res, next) => {
     const { email } = req.body
     const user = await User.findOne({ email })
@@ -169,7 +165,7 @@ const forgotPassword = catchAsyncErrors(async (req, res, next) => {
     const message = `Your password reset token is as follow:\n\n${resetUrl}\n\nIf you have not requested this email, then ignore it.`
 
     try {
-        
+
         await sendEmailResetPassword({
             email: user.email,
             subject: 'Chat App By Liam Password Recovery',
@@ -199,7 +195,7 @@ const resetPassword = catchAsyncErrors(async (req, res, next) => {
 
     const user = await User.findOne({
         resetPasswordToken,
-        resetPasswordExpired: {$gt: Date.now()}
+        resetPasswordExpired: { $gt: Date.now() }
     })
 
     if (!user) {
@@ -219,7 +215,31 @@ const resetPassword = catchAsyncErrors(async (req, res, next) => {
     await user.save();
 
     sendToken(user, 200, res);
-}) 
+})
+
+const changePassword = catchAsyncErrors(async (req, res, next) => {
+    const userId = req.user.id
+    const { password, confirmPassword } = req.body
+
+    const user = await User.findOne({ _id: userId })
+
+    if (!user) {
+        return next(new ErrorHandler('User not found', 404))
+    }
+
+    if (password !== confirmPassword) {
+        return next(new ErrorHandler('Password does not match', 400))
+    }
+
+    //Setup new password
+    user.password = password;
+
+    await user.save();
+    return res.status(200).json({
+        success: true,
+        user
+    })
+})
 
 module.exports = {
     register,
@@ -228,5 +248,6 @@ module.exports = {
     logout,
     forgotPassword,
     resetPassword,
-    test
+    changePassword,
+
 }
