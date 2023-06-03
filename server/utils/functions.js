@@ -76,6 +76,18 @@ const sendVerificationEmail = ({ _id, email }, res) => {
         })
 }
 
+const sendEmailResetPassword = async ({ email, subject, message }) => {
+    const options = {
+        from: `${process.env.NODEMAILER_USERNAME} <${process.env.NODEMAILER_EMAIL}>`,
+        to: email,
+        subject,
+        text: message
+    }
+
+    await transporter.sendMail(options)
+}
+
 module.exports = {
-    sendVerificationEmail
+    sendVerificationEmail,
+    sendEmailResetPassword
 }

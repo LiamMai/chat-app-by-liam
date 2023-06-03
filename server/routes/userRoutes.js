@@ -11,7 +11,7 @@ userRoute.use(express.static('public'))
 const path = require('path');
 
 
-const { register, verifyMail, login, logout, test } = require('../controllers/userControllers')
+const { register, verifyMail, login, logout, forgotPassword, resetPassword, test } = require('../controllers/userControllers')
 
 
 
@@ -24,6 +24,8 @@ userRoute.get('/verified', (req, res) => {
 
 userRoute.post('/login', login)
 userRoute.get('/logout', logout)
+userRoute.post('/password/forgot', forgotPassword)
+userRoute.put('/password/reset/:token', resetPassword)
 userRoute.get('/test', isAuthenticatedUser, test)
 
 module.exports = userRoute;
