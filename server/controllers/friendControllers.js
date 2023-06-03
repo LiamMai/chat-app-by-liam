@@ -1,4 +1,5 @@
 const Friend = require('../models/friendModel');
+const User = require('../models/userModel')
 const ErrorHandler = require('../utils/errorHandler');
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors")
 
@@ -48,12 +49,44 @@ const getFriends = catchAsyncErrors(async (req, res, next) => {
     const friends = await Friend.find({ $or: [{ sender: userId }, { receiver: userId }], accepted: true })
         .populate('sender', 'name')
         .populate('receiver', 'name');
-
     return res.status(200).json({ friends });
+})
+
+const searchFriends = catchAsyncErrors(async (req, res, next) => {
+    const userId = req.user.id;
+    const searchQuery = req.query.q;
+
+    if (!searchQuery) {
+        return next(new ErrorHandler('Please typing name', 400));
+    }
+
+    const regex = new RegExp(searchQuery, 'i');
+
+    const matchingUsers = await User.find({ name: regex }).exec();
+
+    const friendRequests = await Friend.find({
+        $and: [
+            { $or: [{ sender: userId }, { receiver: userId }] },
+            { accepted: true },
+        ],
+    }).exec();
+
+    const friendIds = friendRequests.map((request) =>
+        request.sender.equals(userId) ? request.receiver : request.sender
+    );
+
+    const nonFriendUsers = matchingUsers.filter((user) => !friendIds.includes(user._id.toString()) && user._id !== userId);
+    
+    return res.json({
+        success: true,
+        friends: friendIds,
+        nonFriends: nonFriendUsers
+    })
 })
 
 module.exports = {
     sendFriendRequest,
     acceptFriendRequest,
-    getFriends
+    getFriends,
+    searchFriends
 }
