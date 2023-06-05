@@ -241,6 +241,34 @@ const changePassword = catchAsyncErrors(async (req, res, next) => {
     })
 })
 
+const getCurrentUser = catchAsyncErrors(async (req, res, next) => {
+    const user = await User.findById(req.user.id).exec();
+
+    if (!user) {
+        return next(new ErrorHandler('User not found', 404));
+    }
+
+    return res.status(200).json({
+        success: true,
+        user
+    })
+})
+
+const getUserById = catchAsyncErrors(async (req, res, next) => {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId).exec();
+
+      if (!user) {
+        return next(new ErrorHandler('User not found', 404));
+    }
+
+    return res.status(200).json({
+        success: true,
+        user
+    })
+})
+
 module.exports = {
     register,
     verifyMail,
@@ -249,5 +277,6 @@ module.exports = {
     forgotPassword,
     resetPassword,
     changePassword,
-
+    getCurrentUser,
+    getUserById
 }

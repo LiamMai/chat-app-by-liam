@@ -1,10 +1,13 @@
 const mongoose = require('mongoose');
 
 const conversationSchema = new mongoose.Schema({
-    users: {
-        type: Array,
-        required: true,
-    },
+    users: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'Users'
+        }
+    ],
     groupOwner: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Users',

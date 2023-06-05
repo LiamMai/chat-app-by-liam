@@ -8,27 +8,23 @@ const sendMessage = catchAsyncErrors(async (req, res, next) => {
     const { receiver, text } = req.body;
     const { conversationId } = req.params
     const userId = req.user.id;
-    const users = [userId, receiver]
 
-    const checkExistConversation = await Conversations.find({
-        users: { $all: users }
-    })
+    const checkExistConversation = await Conversations.findById(conversationId);
 
-    if (checkExistConversation.length === 0) {
+
+    if (!checkExistConversation) {
         return next(new ErrorHandler('Conversation not found', 404))
     }
 
     const data = await Messages.create({
         text,
-        sender: userId,
-        receiver,
         conversation: conversationId
     })
 
     if (data) {
         await Conversations.findByIdAndUpdate(conversationId, {
             $push: { messages: data }
-        }, { new: true }).populate('sender').populate('receiver')
+        }, { new: true })
 
         return res.status(200).json({ success: true, message: data })
     }
@@ -39,21 +35,19 @@ const sendMessage = catchAsyncErrors(async (req, res, next) => {
 const getAllMessage = catchAsyncErrors(async (req, res, next) => {
     const { conversationId } = req.params;
 
-    const conversation = await Conversations.find({
+    const conversation = await Conversations.findOne({
         _id: conversationId
-    }).select('messages')
+    }).select(['messages', 'users']).populate('users').populate('messages')
+
 
     if (!conversation) {
         return next(new ErrorHandler('Conversation not found', 404));
     }
 
-
-    const messages = await Messages.find().where('conversation').in(conversation).populate('sender').populate('receiver').exec();
-
-
+    
     return res.status(200).json({
         success: true,
-        messages
+        conversation
     })
 
 
