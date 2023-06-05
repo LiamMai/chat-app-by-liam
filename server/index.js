@@ -4,6 +4,8 @@ const cloudinary = require('cloudinary').v2;
 const mongoose = require('mongoose');
 const cors = require('cors')
 const socket = require('socket.io')
+const bodyParser = require('body-parser');
+
 
 const cookieParser = require('cookie-parser')
 
@@ -28,23 +30,28 @@ cloudinary.config({
 
 
 const app = require('express')();
+const http = require('http')
 const errorMiddleware = require('./middlewares/errors')
 
 
 const userRoute = require("./routes/userRoutes")
 const friendRoute = require('./routes/friendRoutes')
+const messageRoute = require('./routes/messageRoutes')
+const conversationRoute = require('./routes/conversationRoutes')
 
 app.use(cors())
 app.use(cookieParser())
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/api/v1', userRoute);
 app.use('/api/v1', friendRoute)
+app.use('/api/v1', messageRoute)
+app.use('/api/v1', conversationRoute)
 
 //Middleware to handle errors
 app.use(errorMiddleware)
 
-const server = app.listen(process.env.PORT, () => {
-    console.log(`Server is running on port ${process.env.PORT}`);
-})
+const server = http.createServer(app);
 
 const io = socket(server, {
     cors: {
@@ -65,6 +72,12 @@ io.on('connection', (socket) => {
         console.log(`Socket ${socket.id} disconnected`);
     });
 });
+
+app.listen(process.env.PORT, () => {
+    console.log(`Server is running on port ${process.env.PORT}`);
+})
+
+
 
 //Handle Unhandled Promise rejections
 process.on('unhandledRejection', error => {

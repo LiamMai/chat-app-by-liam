@@ -11,10 +11,6 @@ const friendSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  created_at: {
-    type: Date,
-    default: Date.now(),
-  },
   status: {
     type: String,
     enum: ['pending', 'accepted', 'rejected'],

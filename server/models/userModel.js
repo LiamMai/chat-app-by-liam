@@ -41,10 +41,6 @@ const userSchema = mongoose.Schema({
         type: String,
         default: ROLES.USER
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
     resetPasswordToken: String,
     resetPasswordExpired: Date,
 
@@ -86,4 +82,4 @@ userSchema.methods.getResetPasswordToken = function () {
     return resetToken;
 }
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('Users', userSchema);
