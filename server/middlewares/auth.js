@@ -5,10 +5,16 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
 
 const isAuthenticatedUser = catchAsyncErrors(async (req, res, next) => {
-    const { token } = req.cookies;
+    const authHeader = req.headers['authorization'];
    
+    if (!authHeader) {
+        return next(new ErrorHandler('Auth Header not found.', 401))
+    }
+
+    const token = authHeader.split(' ')[1];
+
     if (!token) {
-        return next(new ErrorHandler('Login first to access this resource.', 401))
+        return next(new ErrorHandler('Login first to login this resource.', 401))
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET)

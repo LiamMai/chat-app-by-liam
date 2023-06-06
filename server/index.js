@@ -68,12 +68,17 @@ app.use((req, res, next) => {
 io.on('connection', (socket) => {
     console.log(`Socket ${socket.id} connected`);
 
+    socket.on('message', (msg) => {
+        console.log('message:', msg);
+        io.emit('chat message', msg);
+      });
+
     socket.on('disconnect', () => {
         console.log(`Socket ${socket.id} disconnected`);
     });
 });
 
-app.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);
 })
 

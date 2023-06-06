@@ -1,5 +1,5 @@
 const express = require('express');
-const friendRoute = express();
+const friendRoute = express.Router();
 const { isAuthenticatedUser } = require('../middlewares/auth')
 
 const { sendFriendRequest, acceptFriendRequest, getFriends, searchFriends, rejectFriendRequest } = require('../controllers/friendControllers')

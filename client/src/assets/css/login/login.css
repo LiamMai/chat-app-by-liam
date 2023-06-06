@@ -1,0 +1,13 @@
+.form-input {
+    font-size: 14px;
+    padding-left: 8px;
+    width: 285px;
+    height: 40px;
+}
+
+.btn-primary {
+    margin-top: 16px;
+    opacity: .7;
+    border-radius: 8px;
+    padding: 8px 0;
+}

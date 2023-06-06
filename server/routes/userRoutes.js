@@ -1,5 +1,5 @@
 const express = require('express');
-const userRoute = express();
+const userRoute = express.Router();
 const { isAuthenticatedUser } = require('../middlewares/auth')
 userRoute.use(express.static('public'))
 
