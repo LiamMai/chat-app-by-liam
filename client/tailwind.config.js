@@ -22,7 +22,8 @@ module.exports = {
       backgroundColor: {
         'ig-secondary-background': 'rgb(250, 250, 250)',
         'ig-primary-button': 'rgb(0, 149, 246)',
-        'ig-separator': 'rgb(219, 219, 219)'
+        'ig-separator': 'rgb(219, 219, 219)',
+        'ig-primary-button-hover': 'rgb(24, 119, 242)'
       },
       borderColor: {
         'ig-stroke': 'rgb(219, 219, 219)'
@@ -33,8 +34,11 @@ module.exports = {
       width: {
         'layout-auth': '1050px'
       },
-      color: {
+      colors: {
         'ig-secondary-text': 'rgb(115, 115, 115)'
+      },
+      fontSize: {
+        md: ['17px', '20px'],
       }
     },
   },

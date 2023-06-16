@@ -39,7 +39,7 @@ const friendRoute = require('./routes/friendRoutes')
 const messageRoute = require('./routes/messageRoutes')
 const conversationRoute = require('./routes/conversationRoutes')
 
-app.use(cors())
+app.use(cors({origin: true, credentials: true}))
 app.use(cookieParser())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }))

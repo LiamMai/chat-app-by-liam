@@ -1,14 +1,41 @@
 'use client'
-import { THEME_CONSTANTS } from '@/constants'
 import Image, { StaticImageData } from 'next/image'
 import { useState, useEffect, useRef } from 'react'
-import { BannerArr } from "../../assets/images"
+import { BannerArr } from "../assets/images"
+import { SubmitHandler, useForm } from 'react-hook-form'
+import { ILoginBody } from '@/utils/types/authTypes'
+import ErrorForm from '@/components/error'
+import { yupResolver } from "@hookform/resolvers/yup"
+import { validationLogin } from '@/utils/validationSchema'
+import { useLogin } from '@/store/auth'
+import { successToast } from '@/utils/functions'
+import { useRouter } from 'next/navigation'
+
 
 const Login = () => {
   const [banner, setBanner] = useState(BannerArr[0])
   const indexBanner = useRef(0);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+
+  const { mutate, data: loginData } = useLogin();
+  const router = useRouter()
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<ILoginBody>({
+    resolver: yupResolver(validationLogin),
+  })
+
+  const onSubmit: SubmitHandler<ILoginBody> = (data) => {
+    mutate(data)
+    if (loginData?.status === 200) {
+      successToast("Login Success")
+      router.push('/home')
+    }
+  }
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -40,16 +67,18 @@ const Login = () => {
               <div className='flex flex-col grow justify-center mt-[12px] h-login-banner'>
                 <div className='flex flex-col items-center border border-solid border-slate-300 max-w-[350px] p-10 rounded h-5/6'>
                   <div className='bg-logo bg-contain bg-no-repeat w-[200px] h-[80px]'></div>
-                  <form action="" method='post'>
+                  <form onSubmit={handleSubmit(onSubmit)}>
                     <div>
-                      <input type='text' aria-label="Email" aria-required='true' className='form-input bg-ig-secondary-background border border-ig-stroke rounded' placeholder='Email' name='email' />
+                      <input type='text' aria-label="Email" aria-required='true' className='form-input bg-ig-secondary-background border border-ig-stroke rounded' placeholder='Email' {...register("email")} />
+                      {errors.email && <ErrorForm message={errors.email.message} />}
                     </div>
 
                     <div className='mt-3'>
-                      <input type='password' aria-label="Password" aria-required='true' className='form-input bg-ig-secondary-background border border-ig-stroke rounded' placeholder='Password' name='password' />
+                      <input type='password' aria-label="Password" aria-required='true' className='form-input bg-ig-secondary-background border border-ig-stroke rounded' placeholder='Password' {...register("password")} />
+                      {errors.password && <ErrorForm message={errors.password.message} />}
                     </div>
 
-                    <button type='submit' className='btn-primary bg-ig-primary-button w-full text-white font-bold' disabled={email ? true : false || password ? true : false}>Log in</button>
+                    <button type='submit' className='btn-primary bg-ig-primary-button w-full text-white font-bold' >Log in</button>
 
                     <div className='flex'>
                       <div className='h-[1px] bg-ig-separator block w-[107px] mt-[26px]'></div>
@@ -70,7 +99,7 @@ const Login = () => {
 
                 <div className='flex flex-col justify-center border border-solid border-slate-300 h-1/6 rounded max-w-[350px] mt-[16px]'>
                   <p className='flex justify-center items-center'>
-                    Don't have an account? 
+                    Don't have an account?
                     <a href='/register' className='text-blue-600 ml-[2px] font-bold'>Sign up</a>
                   </p>
                 </div>

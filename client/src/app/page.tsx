@@ -1,20 +1,17 @@
-'use client'
-import Image from 'next/image'
-import { QueryClient, QueryClientProvider, useQuery } from 'react-query'
-import { ReactQueryDevtools } from 'react-query/devtools'
 
-const queryClient = new QueryClient()
+import getQueryClient from '@/utils/getQueryClient';
+import Login from './login'
+import { dehydrate } from '@tanstack/react-query';
+import Hydrate from '@/utils/hydrate.client';
+
 
 
 export default function Home() {
+  const queryClient = getQueryClient();
+  const dehydratedState = dehydrate(queryClient)
   return (
-    <QueryClientProvider client={queryClient}>
-      <main className="flex min-h-screen flex-col items-center justify-between p-24">
-
-      </main>
-      <ReactQueryDevtools initialIsOpen={false} />
-
-    </QueryClientProvider>
-
+    <Hydrate state={dehydratedState}>
+      <Login />
+    </Hydrate>
   )
 }
